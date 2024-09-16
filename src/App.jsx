@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { v4 as uuid } from 'uuid'
 import './App.css'
 
@@ -7,25 +7,37 @@ function App() {
   const [todo, setTodo] = useState('');
   const [todoList, setTodoList] = useState([]);
 
+  useEffect(() => {
+    const savedTodoList = JSON.parse(localStorage.getItem('todoList'));
+    if (savedTodoList.length)
+      setTodoList(savedTodoList);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('todoList', JSON.stringify(todoList));
+  }, [todoList]);
+
   let getTodo = (e) => {
     setTodo(e.target.value);
-  }
+  };
+
   let getTodoList = () => {
-    if (todo.length)
+    if (todo.length > 0)
       setTodoList([...todoList, { id: uuid(), todo: todo, isChecked: false }]);
     setTodo('');
-  }
+  };
+
   let del = (e) => {
     let key = e.target.dataset.id;
     let newTodoList = todoList.filter(item => item.id != key);
     setTodoList(newTodoList);
-  }
+  };
 
   let isCheck = (e) => {
     let id = e.target.dataset.id;
     let newTodoList = todoList.map(todo => todo.id === id ? { ...todo, isChecked: !todo.isChecked } : todo);
     setTodoList(newTodoList);
-  }
+  };
 
   // console.log(todoList)
   return (
@@ -38,12 +50,12 @@ function App() {
         <div className='my-5'>
           {
             todoList.map(({ id, todo, isChecked }) => (
-              <div data-id={id} className='row  justify-content-center my-3'>
-                <div className='col-1 my-auto'>
-                  <input type="checkbox" data-id={id} onChange={isCheck} className='form-check-input' />
+              <div data-id={id} className='row  justify-content-center my-3 p-0'>
+                <div className='col-1 my-auto text-start'>
+                  <input type="checkbox" data-id={id} checked={isChecked} onChange={isCheck} className='form-check-input' />
                 </div>
 
-                <p className={`${isChecked ? 'strike' : ''} col-5  text-light text-start word-break my-auto`}>{todo}</p>
+                <p className={`${isChecked ? 'strike' : ''} col-5 text-light text-start word-break my-auto`}>{todo}</p>
                 <button onClick={del} data-id={id} className='btn col-1 '><span data-id={id} class="material-symbols-outlined text-light">
                   delete
                 </span></button>
